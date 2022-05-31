@@ -4,15 +4,11 @@ import requests
 import base64
 import json
 
-access_token = None
-username = None
+global username,access_token
+
 repos = dict()
 github_api_url = "https://api.github.com/repos/"
 
-
-def set_token_username(token, user):
-    access_token = token
-    username = user
 
 
 def set_input(path_to_csv_file):
@@ -61,19 +57,17 @@ def get_api_url(repo_url):
     url += "contents/package.json"
     return url
 
-def create_fork(owner, repo_name, auth_token):
-    payload = {
-        owner: owner,
-        repo_name: repo_name
-    }
-    data=json.dumps(payload)
-    print(data)
-    url = github_api_url+str(owner)+"/"+str(repo_name)+"/forks"
-    print('url',url)
-    usern = 'aayush1607'
+def fork_api_url(repo_url):
+    _, url = repo_url.split("https://github.com/")
+    url = github_api_url + url
+    if url[-1] != "/":
+        url += "/"
+    url += "forks"
+    return url
 
-    rpost = requests.post(url, auth=(usern, auth_token), data=data)
-    print(rpost)
+def create_fork(repo_url):
+    url = fork_api_url(repo_url)
+    requests.post(url, auth=(username, access_token))
 
 
 def check_versions(dependency, version):
@@ -101,10 +95,11 @@ def check_versions(dependency, version):
         print(*out_res)
     return output
 
-# def update_versions(checked_output, dependency, version):
-#     for repo,repo_url,actual_version,isupdated in checked_output:
-#         if not isupdated:
-#             create_fork()
+def update_versions(checked_output, dependency, version):
+    for repo,repo_url,actual_version,isupdated in checked_output:
+        print(repo)
+        if not isupdated:
+            create_fork(repo_url)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -128,13 +123,13 @@ if __name__ == "__main__":
 
     if args.update:
         username = input("Enter github username:")
-        token = input("Enter github access token:")
-        set_token_username(token, username)
+        access_token = input("Enter github access token:")
+        
 
     set_input(path_to_csv_file=args.input)
 
     dep, ver = args.dependency.split("@")
     checked_output=check_versions(dependency=dep, version=ver)
 
-    # if args.update:
-    #     updated_output=update_versions(checked_output, dependency, version)
+    if args.update:
+        updated_output=update_versions(checked_output, dependency=dep, version=ver)
