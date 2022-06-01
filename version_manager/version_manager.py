@@ -242,9 +242,9 @@ if __name__ == "__main__":
     # print(args.input)
     # print(args.dependency)
     # print(args.update)
-
-    if set_input(path_to_csv_file=args.input):
-
+    taken = set_input(path_to_csv_file=args.input)
+    if taken:
+        # print(repos)
         if args.update:
             username = input("Enter github username:")
             email = input(
@@ -253,20 +253,29 @@ if __name__ == "__main__":
             access_token = input("Enter github access token:")
 
         dep, ver = args.dependency.split("@")
-        checked_output = check_versions(dependency=dep, version=ver)
+        # print(dep, ver)
+        try:
+            checked_output = check_versions(dependency=dep, version=ver)
 
-        if args.update:
-            updated_output = update_versions(
-                checked_output, dependency=dep, version=ver
+            if args.update:
+                updated_output = update_versions(
+                    checked_output, dependency=dep, version=ver
+                )
+                updated_output.insert(
+                    0, ["name", "repo", "version", "version_satisfied", "update_pr"]
+                )
+                display(updated_output)
+                output_to_csv(updated_output)
+            else:
+                checked_output.insert(
+                    0, ["name", "repo", "version", "version_satisfied"]
+                )
+                display(checked_output)
+                output_to_csv(checked_output)
+            print("output saved in output.csv !")
+        except:
+            print(
+                "Github api limit exceeded. Please try after sometime or with a different ip address."
             )
-            updated_output.insert(
-                0, ["name", "repo", "version", "version_satisfied", "update_pr"]
-            )
-            display(updated_output)
-            output_to_csv(updated_output)
-        else:
-            checked_output.insert(0, ["name", "repo", "version", "version_satisfied"])
-            display(checked_output)
-            output_to_csv(checked_output)
     else:
         print("No file found!")
