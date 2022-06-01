@@ -6,7 +6,7 @@
 </p>
 
   <p align="center">
-    A simple lightweight cli tool that checks and updates dependency versions on all your node js github repos.
+    A simple lightweight cli tool that checks and updates dependency versions on all your node js github repos.  <br/>
     Package Published on PyPI - https://pypi.org/project/VM-for-Dyte/
     <br />
   </p>
